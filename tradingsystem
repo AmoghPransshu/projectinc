@@ -1,0 +1,103 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <iomanip>
+using namespace std;
+
+struct Stock {
+    string name;
+    float price;
+    int quantity;
+};
+
+vector<Stock> portfolio;
+
+void loadPortfolio() {
+    ifstream file("portfolio.csv");
+    if (!file) return;
+
+    Stock s;
+    while (file >> s.name >> s.price >> s.quantity) {
+        portfolio.push_back(s);
+    }
+    file.close();
+}
+
+void savePortfolio() {
+    ofstream file("portfolio.csv");
+    for (Stock s : portfolio) {
+        file << s.name << " " << s.price << " " << s.quantity << endl;
+    }
+    file.close();
+}
+
+void displayPortfolio() {
+    cout << "\n **Portfolio:**\n";
+    cout << setw(12) << "Stock" << setw(10) << "Price" << setw(10) << "Quantity\n";
+    cout << "---------------------------------\n";
+    for (Stock s : portfolio) {
+        cout << setw(12) << s.name << setw(10) << s.price << setw(10) << s.quantity << endl;
+    }
+}
+
+void buyStock() {
+    Stock s;
+    cout << "Enter stock name: ";
+    cin >> s.name;
+    cout << "Enter stock price: ";
+    cin >> s.price;
+    cout << "Enter quantity: ";
+    cin >> s.quantity;
+    
+    portfolio.push_back(s);
+    savePortfolio();
+    cout << "** Purchase successful!**\n";
+}
+
+void sellStock() {
+    string name;
+    int quantity;
+    cout << "Enter stock name to sell: ";
+    cin >> name;
+    cout << "Enter quantity to sell: ";
+    cin >> quantity;
+
+    for (auto it = portfolio.begin(); it != portfolio.end(); it++) {
+        if (it->name == name) {
+            if (it->quantity >= quantity) {
+                it->quantity -= quantity;
+                if (it->quantity == 0) portfolio.erase(it);
+                savePortfolio();
+                cout << "** Sell successful!**\n";
+                return;
+            } else {
+                cout << "**Not enough stock!**\n";
+                return;
+            }
+        }
+    }
+    cout << "** Stock not found!**\n";
+}
+
+int main() {
+    loadPortfolio();
+    
+    int choice;
+    while (true) {
+        cout << "\n **Stock Trading System**\n";
+        cout << "1 Buy Stock\n";
+        cout << "2 Sell Stock\n";
+        cout << "3 Show Portfolio\n";
+        cout << "4 Exit\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        if (choice == 1) buyStock();
+        else if (choice == 2) sellStock();
+        else if (choice == 3) displayPortfolio();
+        else if (choice == 4) break;
+        else cout << "** Invalid choice!**\n";
+    }
+    
+    return 0;
+}
